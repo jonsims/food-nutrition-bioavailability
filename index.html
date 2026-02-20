@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>From Farm to Fork: Nutrient Bioavailability Journey</title>
+  <style>
+    :root {
+      --green-dark: #1a5c2e;
+      --green-mid: #2d8a4e;
+      --green-light: #4caf50;
+      --orange: #ff9800;
+      --red: #e53935;
+      --blue: #1976d2;
+      --blue-light: #42a5f5;
+      --purple: #7b1fa2;
+      --teal: #00897b;
+      --bg: #f5f7f0;
+      --card-bg: #ffffff;
+      --text: #1a2e1a;
+      --text-light: #5a6a5a;
+      --shadow: 0 4px 20px rgba(0,0,0,0.08);
+      --radius: 12px;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* HERO */
+    .hero {
+      background: linear-gradient(135deg, #1a5c2e 0%, #2d8a4e 40%, #4caf50 100%);
+      color: white; padding: 2.5rem 2rem 1.5rem; text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -50%; left: -50%; width: 200%; height: 200%;
+      background: radial-gradient(circle at 30% 70%, rgba(255,255,255,0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+    .hero h1 { font-size: 2.5rem; font-weight: 700; margin-bottom: 0.4rem; position: relative; }
+    .hero .subtitle { font-size: 1.05rem; opacity: 0.9; max-width: 700px; margin: 0 auto; position: relative; }
+    .hero .emoji-row { font-size: 1.8rem; margin-top: 0.75rem; position: relative; }
+
+    /* TABS */
+    .tab-bar {
+      background: white; border-bottom: 2px solid #e0e0e0;
+      position: sticky; top: 0; z-index: 50;
+      display: flex; justify-content: center; gap: 0;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+    .tab-btn {
+      padding: 0.9rem 2rem; border: none; background: none;
+      font-size: 1rem; font-weight: 600; color: var(--text-light);
+      cursor: pointer; position: relative; transition: color 0.2s;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .tab-btn:hover { color: var(--green-dark); }
+    .tab-btn.active { color: var(--green-dark); }
+    .tab-btn.active::after {
+      content: ''; position: absolute; bottom: -2px; left: 0; right: 0;
+      height: 3px; background: var(--green-mid); border-radius: 3px 3px 0 0;
+    }
+    .tab-btn .tab-icon { font-size: 1.2rem; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .section-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 0.5rem; color: var(--green-dark); }
+    .section-desc { color: var(--text-light); margin-bottom: 1.5rem; font-size: 0.95rem; line-height: 1.6; }
+
+    /* QUICK INTRO (replaces big definition block on Explore tab) */
+    .quick-intro {
+      background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%);
+      border: 2px solid #c8e6c9; border-radius: var(--radius);
+      padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;
+      display: flex; align-items: flex-start; gap: 1rem;
+    }
+    .quick-intro .qi-icon { font-size: 2rem; flex-shrink: 0; margin-top: 0.1rem; }
+    .quick-intro p { font-size: 0.92rem; color: var(--text); line-height: 1.55; }
+    .quick-intro strong { color: var(--green-dark); }
+    .quick-intro .learn-more {
+      color: var(--blue); cursor: pointer; font-weight: 600;
+      text-decoration: none; white-space: nowrap;
+    }
+    .quick-intro .learn-more:hover { text-decoration: underline; }
+
+    /* SELECTORS */
+    .selectors { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    @media (max-width: 900px) { .selectors { grid-template-columns: 1fr; } }
+    .selector-panel { background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); }
+    .selector-panel h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 0.5rem; }
+    .selector-panel h3 .icon { font-size: 1.3rem; }
+    .pill-group { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+    .pill {
+      padding: 0.4rem 0.9rem; border-radius: 20px; border: 2px solid #e0e0e0;
+      background: white; cursor: pointer; font-size: 0.85rem; font-weight: 500;
+      transition: all 0.2s; user-select: none;
+    }
+    .pill:hover { border-color: var(--green-light); background: #f0f9f0; }
+    .pill.active { border-color: var(--green-mid); background: var(--green-mid); color: white; }
+    .pill.vitamin.active { background: #e65100; border-color: #e65100; }
+    .pill.mineral.active { background: var(--blue); border-color: var(--blue); }
+    .pill.macro.active { background: var(--purple); border-color: var(--purple); }
+    .pill.preserve.active { background: var(--teal); border-color: var(--teal); }
+    .pill.cook.active { background: var(--orange); border-color: var(--orange); }
+
+    /* JOURNEY */
+    .journey-section { background: var(--card-bg); border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+    .journey-pipeline { display: flex; align-items: stretch; gap: 0; margin: 1.5rem 0; position: relative; }
+    @media (max-width: 700px) {
+      .journey-pipeline { flex-direction: column; }
+      .journey-arrow { transform: rotate(90deg); }
+    }
+    .journey-stage { flex: 1; text-align: center; padding: 1.5rem 1rem; position: relative; border-radius: var(--radius); transition: all 0.4s ease; }
+    .journey-stage .stage-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .journey-stage .stage-label { font-weight: 600; font-size: 0.9rem; margin-bottom: 0.3rem; }
+    .journey-stage .stage-value { font-size: 2rem; font-weight: 700; transition: all 0.4s ease; }
+    .journey-stage .stage-detail { font-size: 0.78rem; color: var(--text-light); margin-top: 0.3rem; }
+    .journey-arrow { display: flex; align-items: center; font-size: 1.5rem; color: #bbb; padding: 0 0.3rem; }
+    .retention-bar-container { width: 100%; height: 8px; background: #e8e8e8; border-radius: 4px; margin-top: 0.5rem; overflow: hidden; }
+    .retention-bar { height: 100%; border-radius: 4px; transition: width 0.6s ease, background 0.4s ease; }
+    .legend { display: flex; gap: 1.5rem; justify-content: center; margin: 1rem 0; flex-wrap: wrap; font-size: 0.85rem; }
+    .legend-item { display: flex; align-items: center; gap: 0.4rem; }
+    .legend-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+    /* NUTRIENT DETAIL */
+    .nutrient-detail { background: var(--card-bg); border-radius: var(--radius); padding: 1.75rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.5rem; }
+    @media (max-width: 800px) { .nutrient-detail { grid-template-columns: 1fr; } }
+    .nutrient-detail-header { grid-column: 1 / -1; display: flex; align-items: center; gap: 1rem; padding-bottom: 1rem; border-bottom: 2px solid #eee; }
+    .nutrient-detail-header .nd-icon { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; color: white; flex-shrink: 0; }
+    .nutrient-detail-header h3 { font-size: 1.25rem; }
+    .nutrient-detail-header .nd-subtitle { font-size: 0.85rem; color: var(--text-light); }
+    .nd-col h4 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+    .nd-col h4.fn-label { color: var(--green-dark); }
+    .nd-col h4.imp-label { color: var(--blue); }
+    .nd-col h4.def-label { color: var(--red); }
+    .nd-col p { font-size: 0.88rem; color: var(--text-light); line-height: 1.55; }
+    .nd-col .deficiency-name { display: inline-block; background: #ffebee; color: #c62828; padding: 0.15rem 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600; margin-top: 0.4rem; }
+    .nd-col .bioavail-note { margin-top: 0.6rem; padding: 0.6rem 0.75rem; background: #fff8e1; border-radius: 8px; border-left: 3px solid var(--orange); font-size: 0.82rem; color: #5d4037; }
+
+    /* PROCESS MECHANISM */
+    .process-mechanism { background: var(--card-bg); border-radius: var(--radius); padding: 1.75rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+    .mechanism-content { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+    @media (max-width: 700px) { .mechanism-content { grid-template-columns: 1fr; } }
+    .mechanism-card { padding: 1.25rem; border-radius: 10px; border: 1px solid #eee; }
+    .mechanism-card h4 { font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.4rem; }
+    .mechanism-card p { font-size: 0.85rem; color: var(--text-light); line-height: 1.5; }
+    .mechanism-card.increases { background: #e8f5e9; border-color: #c8e6c9; }
+    .mechanism-card.increases h4 { color: #2e7d32; }
+    .mechanism-card.decreases { background: #fff3e0; border-color: #ffe0b2; }
+    .mechanism-card.decreases h4 { color: #e65100; }
+    .mechanism-card.neutral { background: #f3f3f3; border-color: #e0e0e0; }
+
+    /* INSIGHTS */
+    .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
+    .insight-card { background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); border-left: 4px solid var(--green-mid); }
+    .insight-card.warning { border-left-color: var(--orange); }
+    .insight-card.tip { border-left-color: var(--blue); }
+    .insight-card h4 { font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem; }
+    .insight-card p { font-size: 0.85rem; color: var(--text-light); line-height: 1.5; }
+
+    /* ======= DEEP DIVE TAB ======= */
+    .definition-section { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 2px solid #c8e6c9; border-radius: var(--radius); padding: 2rem; margin-bottom: 2rem; }
+    .definition-section h2 { color: var(--green-dark); margin-bottom: 0.75rem; }
+    .def-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-top: 1rem; }
+    @media (max-width: 700px) { .def-grid { grid-template-columns: 1fr; } }
+    .def-card { background: white; border-radius: 10px; padding: 1.25rem; border-left: 4px solid var(--green-mid); }
+    .def-card.contrast { border-left-color: var(--orange); }
+    .def-card h4 { font-size: 0.95rem; margin-bottom: 0.4rem; color: var(--green-dark); }
+    .def-card p { font-size: 0.88rem; color: var(--text-light); line-height: 1.55; }
+
+    /* CHART & TABLE */
+    .chart-section { background: var(--card-bg); border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; }
+    .chart-wrapper { position: relative; width: 100%; max-width: 800px; margin: 1rem auto; height: 400px; }
+    .comparison-section { background: var(--card-bg); border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; overflow-x: auto; }
+    .comparison-table { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.88rem; }
+    .comparison-table thead th { background: var(--green-dark); color: white; padding: 0.75rem 1rem; text-align: center; font-weight: 600; position: sticky; top: 0; }
+    .comparison-table thead th:first-child { text-align: left; border-radius: var(--radius) 0 0 0; }
+    .comparison-table thead th:last-child { border-radius: 0 var(--radius) 0 0; }
+    .comparison-table tbody td { padding: 0.65rem 1rem; text-align: center; border-bottom: 1px solid #eee; }
+    .comparison-table tbody td:first-child { text-align: left; font-weight: 600; }
+    .comparison-table tbody tr:hover { background: #f5faf5; }
+    .cell-badge { display: inline-block; padding: 0.2rem 0.6rem; border-radius: 12px; font-weight: 600; font-size: 0.82rem; min-width: 52px; }
+    .cell-high { background: #e8f5e9; color: #2e7d32; }
+    .cell-medium { background: #fff3e0; color: #e65100; }
+    .cell-low { background: #ffebee; color: #c62828; }
+
+    /* SOURCES */
+    .sources-section { background: var(--card-bg); border-radius: var(--radius); padding: 2rem; box-shadow: var(--shadow); margin-bottom: 2rem; }
+    .source-list { list-style: none; }
+    .source-list li { padding: 0.6rem 0; border-bottom: 1px solid #eee; font-size: 0.88rem; display: flex; gap: 0.75rem; align-items: flex-start; }
+    .source-list li:last-child { border-bottom: none; }
+    .source-num { background: var(--green-dark); color: white; min-width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; flex-shrink: 0; }
+    .source-list a { color: var(--blue); text-decoration: none; }
+    .source-list a:hover { text-decoration: underline; }
+
+    footer { text-align: center; padding: 2rem; color: var(--text-light); font-size: 0.85rem; }
+
+    .info-tip { position: relative; display: inline-block; cursor: help; color: var(--blue); font-size: 0.8rem; margin-left: 0.3rem; }
+    .info-tip::after {
+      content: attr(data-tip); position: absolute; bottom: 130%; left: 50%; transform: translateX(-50%);
+      background: #333; color: white; padding: 0.5rem 0.75rem; border-radius: 6px; font-size: 0.78rem;
+      white-space: normal; width: 240px; text-align: center; opacity: 0; pointer-events: none;
+      transition: opacity 0.2s; z-index: 100; line-height: 1.4;
+    }
+    .info-tip:hover::after { opacity: 1; }
+
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    .animate-in { animation: fadeInUp 0.5s ease forwards; }
+  </style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>From Farm to Fork</h1>
+  <p class="subtitle">How food processing, preservation, and cooking change the <strong>bioavailability</strong> of the nutrients on your plate &mdash; and why it matters for your health.</p>
+  <div class="emoji-row">&#x1F33E; &rarr; &#x1F69A; &rarr; &#x1F3ED; &rarr; &#x1F373; &rarr; &#x1F37D;&#xFE0F;</div>
+</div>
+
+<!-- TAB BAR -->
+<div class="tab-bar">
+  <button class="tab-btn active" data-tab="explore"><span class="tab-icon">&#x1F50D;</span> Explore</button>
+  <button class="tab-btn" data-tab="deepdive"><span class="tab-icon">&#x1F4DA;</span> Deep Dive</button>
+</div>
+
+<!-- ===== TAB 1: EXPLORE ===== -->
+<div class="tab-panel active" id="tab-explore">
+<div class="container">
+
+  <!-- Quick intro -->
+  <div class="quick-intro">
+    <div class="qi-icon">&#x1F4A1;</div>
+    <p>The Nutrition Facts label tells you what's <em>in</em> your food &mdash; but not how much your body actually <em>absorbs</em>. That depends on <strong>bioavailability</strong>: the fraction of a nutrient that survives storage, processing, and cooking, and then crosses your gut wall into your bloodstream. Pick a nutrient and see what happens to it on the journey from farm to fork. <a class="learn-more" data-tab="deepdive" onclick="switchTab('deepdive')">Learn more &rarr;</a></p>
+  </div>
+
+  <!-- Selectors -->
+  <div class="selectors">
+    <div class="selector-panel">
+      <h3><span class="icon">&#x1F9EA;</span> 1. Pick a Nutrient</h3>
+      <div class="pill-group" id="nutrient-pills"></div>
+    </div>
+    <div class="selector-panel">
+      <h3><span class="icon">&#x1F4E6;</span> 2. How Was It Preserved?</h3>
+      <div class="pill-group" id="preserve-pills"></div>
+    </div>
+    <div class="selector-panel">
+      <h3><span class="icon">&#x1F525;</span> 3. How Was It Cooked?</h3>
+      <div class="pill-group" id="cook-pills"></div>
+    </div>
+  </div>
+
+  <!-- Journey Pipeline -->
+  <div class="journey-section">
+    <h2 class="section-title">Bioavailability Journey</h2>
+    <p class="section-desc">Watch how <span id="nutrient-name-label" style="font-weight:700;"></span> changes at each stage from harvest to your plate. Values <strong>compound</strong> through the pipeline. <span class="info-tip" data-tip="Results vary by specific food, duration, temperature, and preparation technique.">&#9432;</span></p>
+    <div class="journey-pipeline" id="journey-pipeline"></div>
+    <div class="legend">
+      <div class="legend-item"><div class="legend-dot" style="background:#2e7d32;"></div> 70%+ bioavailable</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#ff9800;"></div> 40&ndash;69% bioavailable</div>
+      <div class="legend-item"><div class="legend-dot" style="background:#e53935;"></div> &lt; 40% bioavailable</div>
+    </div>
+  </div>
+
+  <!-- Nutrient Detail -->
+  <div class="nutrient-detail" id="nutrient-detail"></div>
+
+  <!-- Process Mechanisms -->
+  <div class="process-mechanism" id="process-mechanism"></div>
+
+  <!-- Key Insights -->
+  <div>
+    <h2 class="section-title">Key Bioavailability Insights</h2>
+    <p class="section-desc">Practical takeaways from the research.</p>
+    <div class="insights-grid">
+      <div class="insight-card tip">
+        <h4>&#x2744;&#xFE0F; Frozen can beat "fresh"</h4>
+        <p>Produce is flash-frozen within hours of harvest, locking in nutrients at peak levels. Store-bought "fresh" produce may have traveled for days, losing water-soluble vitamins to oxidation. After 5 days on a shelf, frozen vegetables are measurably more nutritious. <sup>[3, 8]</sup></p>
+      </div>
+      <div class="insight-card warning">
+        <h4>&#x1F4A7; Water leaches water-soluble nutrients</h4>
+        <p>Boiling dissolves vitamin C, B vitamins, and potassium into cooking water through <strong>leaching</strong>. Up to 60% of vitamin C and potassium can migrate to the water. Steam or microwave instead, or use the cooking liquid in soups. <sup>[2, 5, 10]</sup></p>
+      </div>
+      <div class="insight-card">
+        <h4>&#x1F34E; Cooking can increase bioavailability</h4>
+        <p>Heat breaks down plant cell walls, releasing trapped nutrients. Lycopene bioavailability in tomatoes <em>increases 2&ndash;3x</em> with cooking. Beta-carotene in carrots becomes far more bioaccessible when cooked with a small amount of fat. <sup>[7, 12]</sup></p>
+      </div>
+      <div class="insight-card tip">
+        <h4>&#x26A1; Minerals are heat-stable but can leach</h4>
+        <p>Iron, calcium, and potassium are not destroyed by heat. Their main loss is leaching into water, not chemical breakdown. Dry-heat methods (roasting, microwaving, stir-frying) preserve nearly all mineral content. <sup>[4, 6]</sup></p>
+      </div>
+      <div class="insight-card warning">
+        <h4>&#x23F1;&#xFE0F; Time + oxygen + light degrade vitamins</h4>
+        <p>Vitamin C is oxidized by air and broken down by light. Fresh produce loses 10&ndash;25% of its vitamin C per week at room temperature. Folate is similarly oxygen-sensitive. Eat fresh produce quickly, or choose frozen. <sup>[1, 5]</sup></p>
+      </div>
+      <div class="insight-card">
+        <h4>&#x1F9C0; Fat + fat-soluble vitamins = better absorption</h4>
+        <p>Vitamins A, D, E, and K dissolve in fat, not water. Eating them with dietary fat (olive oil, butter, avocado) increases absorption through the intestinal wall by up to 5&ndash;10x. <sup>[11, 12]</sup></p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ===== TAB 2: DEEP DIVE ===== -->
+<div class="tab-panel" id="tab-deepdive">
+<div class="container">
+
+  <!-- Full Bioavailability Definitions -->
+  <div class="definition-section">
+    <h2 class="section-title">Understanding Bioavailability</h2>
+    <p class="section-desc">Not all the nutrients listed on a Nutrition Facts label make it into your body. <strong style="color:var(--green-dark);">Bioavailability</strong> is the proportion of a nutrient that is actually <em>absorbed and used</em> by your body after you eat it. Two people eating the same food may absorb very different amounts of the same nutrient, depending on how that food was stored, processed, and cooked. <sup>[11, 12]</sup></p>
+    <div class="def-grid">
+      <div class="def-card">
+        <h4>Bioaccessibility</h4>
+        <p>The fraction of a nutrient that is <strong>released from the food matrix</strong> during digestion so it <em>could</em> be absorbed. Cooking often increases bioaccessibility by breaking down plant cell walls, softening fibers, and denaturing proteins that trap nutrients inside cells. <sup>[11]</sup></p>
+      </div>
+      <div class="def-card">
+        <h4>Bioavailability</h4>
+        <p>The fraction that actually <strong>crosses the intestinal wall and enters circulation</strong> to be used by cells. This depends on bioaccessibility <em>plus</em> the nutrient's chemical form, interactions with other food components, and the person's gut health. <sup>[12]</sup></p>
+      </div>
+      <div class="def-card contrast">
+        <h4>Why Retention Alone Isn't the Whole Story</h4>
+        <p>A food might <em>retain</em> 100% of a nutrient but have <em>low bioavailability</em> because the nutrient is locked inside tough cell walls. Conversely, cooking may <em>reduce</em> total content while <em>increasing</em> what your body actually absorbs &mdash; as with lycopene in tomatoes and beta-carotene in carrots. <sup>[7, 12]</sup></p>
+      </div>
+      <div class="def-card contrast">
+        <h4>Key Factors That Affect Bioavailability</h4>
+        <p><strong>Enhancers:</strong> Vitamin C boosts iron absorption. Fat increases absorption of vitamins A, D, E, K. Cooking breaks cell walls.<br><strong>Inhibitors:</strong> Phytates (grains/legumes), oxalates (spinach), tannins (tea), and fiber can bind minerals and reduce absorption. <sup>[4, 11]</sup></p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Comparison Chart -->
+  <div class="chart-section">
+    <h2 class="section-title">Compare Across All Methods</h2>
+    <p class="section-desc">Final bioavailable amount of <span id="chart-nutrient-label" style="font-weight:700;"></span> across every preservation + cooking combination. (Change nutrient on the Explore tab.)</p>
+    <div class="chart-wrapper">
+      <canvas id="comparison-chart"></canvas>
+    </div>
+  </div>
+
+  <!-- Reference Table -->
+  <div class="comparison-section">
+    <h2 class="section-title">Bioavailability Reference Table</h2>
+    <p class="section-desc">Typical retention at the <strong>cooking stage only</strong> (not cumulative) for common Nutrition Facts nutrients.</p>
+    <table class="comparison-table" id="ref-table">
+      <thead><tr><th>Nutrient</th><th>Boiling</th><th>Steaming</th><th>Microwaving</th><th>Roasting</th><th>Stir-Frying</th><th>Raw</th></tr></thead>
+      <tbody id="ref-table-body"></tbody>
+    </table>
+  </div>
+
+  <!-- Sources -->
+  <div class="sources-section">
+    <h2 class="section-title">Sources</h2>
+    <p class="section-desc">All data drawn from peer-reviewed research and authoritative public-health organizations.</p>
+    <ol class="source-list">
+      <li><span class="source-num">1</span><span>USDA Agricultural Research Service. <em>USDA Table of Nutrient Retention Factors, Release 6.</em> <a href="https://www.ars.usda.gov/arsuserfiles/80400530/pdf/retn06.pdf" target="_blank" rel="noopener">ars.usda.gov/retn06.pdf</a></span></li>
+      <li><span class="source-num">2</span><span>Lee, S. et al. (2018). Effect of different cooking methods on the content of vitamins and true retention in selected vegetables. <em>Food Sci Biotechnol</em>, 27(2), 333&ndash;342. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC6049644/" target="_blank" rel="noopener">PMC6049644</a></span></li>
+      <li><span class="source-num">3</span><span>Rickman, J.C. et al. (2007). Nutritional comparison of fresh, frozen and canned fruits and vegetables. <em>J Sci Food Agric</em>, 87(6), 930&ndash;944. <a href="https://health.clevelandclinic.org/are-fresh-vegetables-healthier-than-frozen-or-canned" target="_blank" rel="noopener">Cleveland Clinic summary</a></span></li>
+      <li><span class="source-num">4</span><span>Kimura, M. &amp; Itokawa, Y. (1990). Cooking losses of minerals in foods and its nutritional significance. <em>J Nutr Sci Vitaminol</em>, 36, S25&ndash;S33. <a href="https://pubmed.ncbi.nlm.nih.gov/2081985/" target="_blank" rel="noopener">PubMed 2081985</a></span></li>
+      <li><span class="source-num">5</span><span>Deli&#cacute;, V. et al. (2021). Impact of innovative technologies on vitamin C content and bioavailability from processed fruit and vegetable products. <em>Antioxidants</em>, 10(1), 54. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7824742/" target="_blank" rel="noopener">PMC7824742</a></span></li>
+      <li><span class="source-num">6</span><span>Ferraris, C. et al. (2025). Effects of household cooking on mineral composition and retention in Italian vegetables. <em>Nutrients</em>, 17(3), 423. <a href="https://www.mdpi.com/2072-6643/17/3/423" target="_blank" rel="noopener">MDPI Nutrients</a></span></li>
+      <li><span class="source-num">7</span><span>Bengtsson, A. et al. (2009). Processing and bioavailability of carotenoids. <em>Comprehensive Reviews in Food Science</em>. Also: <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC10969708/" target="_blank" rel="noopener">PMC10969708 (2024)</a></span></li>
+      <li><span class="source-num">8</span><span>University of Reading (2023). Frozen and tinned foods can be just as nutritious as fresh produce. <a href="https://research.reading.ac.uk/research-blog/2023/04/10/frozen-and-tinned-foods-can-be-just-as-nutritious-as-fresh-produce-heres-how/" target="_blank" rel="noopener">research.reading.ac.uk</a></span></li>
+      <li><span class="source-num">9</span><span>USDA FSIS. <em>Freezing and Food Safety.</em> <a href="https://www.fsis.usda.gov/food-safety/safe-food-handling-and-preparation/food-safety-basics/freezing-and-food-safety" target="_blank" rel="noopener">fsis.usda.gov</a></span></li>
+      <li><span class="source-num">10</span><span>Verhoeven, D.T. et al. (2023). Relative role of leaching and chemical degradation in the loss of water-soluble vitamins C and B9. <em>LWT</em>, 186, 115246. <a href="https://www.sciencedirect.com/science/article/pii/S0023643823002736" target="_blank" rel="noopener">ScienceDirect</a></span></li>
+      <li><span class="source-num">11</span><span>Rein, M.J. et al. (2013). Bioavailability of bioactive food compounds: a challenging journey to bioefficacy. <em>Br J Clin Pharmacol</em>, 75(3), 588&ndash;602. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3575927/" target="_blank" rel="noopener">PMC3575927</a></span></li>
+      <li><span class="source-num">12</span><span>Bohn, T. et al. (2020). Bioavailability of micronutrients from nutrient-dense whole foods. <em>Front Nutr</em>, 7, 359. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC7393990/" target="_blank" rel="noopener">PMC7393990</a></span></li>
+      <li><span class="source-num">13</span><span>Merck Manual Professional Edition. Symptoms and signs of nutritional deficiency. <a href="https://www.merckmanuals.com/professional/multimedia/table/symptoms-and-signs-of-nutritional-deficiency" target="_blank" rel="noopener">merckmanuals.com</a></span></li>
+      <li><span class="source-num">14</span><span>Lowe, N.M. et al. (2022). Main nutritional deficiencies. <em>J Prev Med Hyg</em>, 63(2 Suppl 3), E93&ndash;E101. <a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC9710417/" target="_blank" rel="noopener">PMC9710417</a></span></li>
+    </ol>
+  </div>
+
+</div>
+</div>
+
+<footer>
+  <p>SES Class &mdash; Food &amp; Nutrition Bioavailability Infographic &mdash; Data compiled from peer-reviewed sources, Feb 2025</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
+
+<script>
+// ============================================================
+// DATA (all unchanged from previous version)
+// ============================================================
+const NUTRIENTS = {
+  vitC:      { name: "Vitamin C",       category: "vitamin",  unit: "mg" },
+  vitA:      { name: "Vitamin A",       category: "vitamin",  unit: "mcg RAE" },
+  thiamin:   { name: "Thiamin (B1)",    category: "vitamin",  unit: "mg" },
+  riboflavin:{ name: "Riboflavin (B2)", category: "vitamin",  unit: "mg" },
+  niacin:    { name: "Niacin (B3)",     category: "vitamin",  unit: "mg" },
+  vitB6:     { name: "Vitamin B6",      category: "vitamin",  unit: "mg" },
+  folate:    { name: "Folate",          category: "vitamin",  unit: "mcg DFE" },
+  vitD:      { name: "Vitamin D",       category: "vitamin",  unit: "mcg" },
+  iron:      { name: "Iron",            category: "mineral",  unit: "mg" },
+  calcium:   { name: "Calcium",         category: "mineral",  unit: "mg" },
+  potassium: { name: "Potassium",       category: "mineral",  unit: "mg" },
+  fiber:     { name: "Dietary Fiber",   category: "macro",    unit: "g" },
+  protein:   { name: "Protein",         category: "macro",    unit: "g" },
+};
+
+const NUTRIENT_INFO = {
+  vitC: { icon: "&#x1F34A;", solubility: "Water-soluble", bodyFunction: "Acts as a powerful antioxidant, neutralizing free radicals that damage cells. Essential for synthesizing collagen (the protein that holds skin, tendons, and blood vessels together). Helps the immune system produce white blood cells and antibodies.", importance: "Required for wound healing, iron absorption from plant foods, and maintaining healthy cartilage, bones, and teeth. Supports the immune defense against infections.", deficiency: "Scurvy: bleeding gums, loose teeth, poor wound healing, bruising easily, fatigue, and joint pain. Historically devastated sailors on long voyages without fresh produce.", deficiencyName: "Scurvy", bioNote: "Highly heat-sensitive and water-soluble. Degrades rapidly with heat, light, and oxygen exposure. Boiling can destroy 50\u201370% through both thermal breakdown and leaching into water. Raw or lightly steamed foods preserve the most. Vitamin C itself enhances iron bioavailability when consumed together." },
+  vitA: { icon: "&#x1F955;", solubility: "Fat-soluble", bodyFunction: "Critical for vision (especially night vision), as it forms the light-sensing pigment rhodopsin in the retina. Regulates cell growth and differentiation. Maintains the integrity of skin and mucous membranes, which act as barriers against infection.", importance: "Supports immune function, reproduction, and embryonic development. As beta-carotene (provitamin A), it acts as an antioxidant protecting against cellular damage.", deficiency: "Night blindness progressing to xerophthalmia (dry, damaged corneas that can cause permanent blindness). Increased susceptibility to infections, especially in children. The leading cause of preventable childhood blindness worldwide.", deficiencyName: "Xerophthalmia / Night blindness", bioNote: "Fat-soluble \u2014 bioavailability increases dramatically when consumed with dietary fat. Cooking significantly increases beta-carotene bioaccessibility by rupturing plant cell walls (carrots, sweet potatoes). Raw carrots may yield only 3\u20134% of their beta-carotene; cooking and adding oil can raise this to 25\u201340%." },
+  thiamin: { icon: "&#x1F33E;", solubility: "Water-soluble", bodyFunction: "A coenzyme in energy metabolism: converts carbohydrates into usable energy (ATP) via the citric acid cycle. Essential for nerve signal transmission and muscle contraction, including the heart muscle.", importance: "Without thiamin, cells cannot efficiently produce energy from glucose. Particularly important for the brain and nervous system, which rely heavily on glucose for fuel.", deficiency: "Beriberi: wet beriberi affects the cardiovascular system (heart failure, edema); dry beriberi affects the nervous system (muscle wasting, numbness, paralysis). Wernicke-Korsakoff syndrome in severe cases, causing confusion, memory loss, and uncoordinated movement.", deficiencyName: "Beriberi", bioNote: "Destroyed by prolonged heat, alkaline conditions (baking soda), and sulfites. Leaches readily into cooking water. Losses during canning can reach 30\u201370%. Steaming and microwaving preserve significantly more than boiling." },
+  riboflavin: { icon: "&#x1F95B;", solubility: "Water-soluble", bodyFunction: "Part of two coenzymes (FAD and FMN) central to energy production, cellular function, and the metabolism of fats, drugs, and steroids. Helps convert other B vitamins (B6, folate) into their active forms.", importance: "Supports normal growth, red blood cell production, and healthy skin and eyes. Plays a role in maintaining the mucous membranes of the digestive system.", deficiency: "Ariboflavinosis: cracked and sore lips (cheilosis), inflamed tongue (glossitis), mouth ulcers, sore throat, and sensitivity to light. Skin becomes scaly, especially around the nose and mouth.", deficiencyName: "Ariboflavinosis", bioNote: "Relatively heat-stable but very sensitive to light (UV radiation). Milk left in clear glass bottles can lose 50% of riboflavin in 2 hours of sunlight. More stable during cooking than other B vitamins. Minimal leaching losses compared to thiamin and vitamin C." },
+  niacin: { icon: "&#x1F357;", solubility: "Water-soluble", bodyFunction: "Component of NAD and NADP, coenzymes involved in over 400 enzymatic reactions \u2014 more than any other vitamin. Critical for energy metabolism, DNA repair, and cell signaling.", importance: "Supports the nervous system, digestive system, and skin health. Helps convert food into energy and plays a role in cholesterol metabolism.", deficiency: "Pellagra, characterized by the \u201c4 Ds\u201d: dermatitis (sun-sensitive skin rash), diarrhea, dementia, and if untreated, death. Historically common in populations relying heavily on untreated corn.", deficiencyName: "Pellagra", bioNote: "The most heat-stable of the B vitamins. Niacin in corn is bound to a form (niacytin) that humans cannot absorb unless the corn is treated with lime (nixtamalization) \u2014 a traditional process that increases bioavailability by freeing bound niacin." },
+  vitB6: { icon: "&#x1F33F;", solubility: "Water-soluble", bodyFunction: "Coenzyme in over 100 enzyme reactions, mostly in protein metabolism. Essential for neurotransmitter synthesis (serotonin, dopamine, GABA), hemoglobin production, and immune function.", importance: "Supports brain development and function, helps the body make melatonin (sleep regulation) and norepinephrine (stress response). Important during pregnancy for fetal brain development.", deficiency: "Peripheral neuropathy (tingling and numbness in hands and feet), anemia, weakened immune response, confusion, depression, and cracked lip corners. Seizures in severe cases, especially in infants.", deficiencyName: "Peripheral neuropathy", bioNote: "Moderately heat-sensitive. The pyridoxal form in animal foods has higher bioavailability (~75%) than the pyridoxine glucoside form in plant foods (~50%). Cooking losses of 20\u201345% are typical, mainly through leaching." },
+  folate: { icon: "&#x1F96C;", solubility: "Water-soluble", bodyFunction: "Essential for DNA synthesis, repair, and methylation. Required for proper cell division and the formation of red and white blood cells in bone marrow. Converts homocysteine to methionine, protecting cardiovascular health.", importance: "Critical during pregnancy: adequate folate in the first 28 days prevents neural tube defects (spina bifida, anencephaly) in the developing fetus. Important for rapid cell growth in infants and adolescents.", deficiency: "Megaloblastic anemia: abnormally large, immature red blood cells that cannot carry oxygen efficiently. Causes fatigue, weakness, shortness of breath, irritability. During pregnancy, deficiency causes neural tube birth defects.", deficiencyName: "Megaloblastic anemia / Neural tube defects", bioNote: "Highly vulnerable to heat, oxidation, and leaching. Boiling can destroy 40\u201360% of folate. Natural food folate has ~50% bioavailability compared to folic acid supplements (~85%). Leafy greens should be consumed raw, lightly steamed, or quickly stir-fried to preserve folate." },
+  vitD: { icon: "&#x2600;&#xFE0F;", solubility: "Fat-soluble", bodyFunction: "Functions more like a hormone than a vitamin. Regulates calcium and phosphorus absorption in the gut, making it indispensable for bone mineralization. Modulates immune cell activity and reduces inflammation.", importance: "Without sufficient vitamin D, the body cannot absorb enough calcium even from a calcium-rich diet. Also linked to muscle function, mood regulation, and reduced risk of certain autoimmune conditions.", deficiency: "Rickets in children (soft, weak, deformed bones). Osteomalacia in adults (bone pain, muscle weakness). Long-term deficiency contributes to osteoporosis and increased fracture risk. Associated with depression and impaired immune function.", deficiencyName: "Rickets (children) / Osteomalacia (adults)", bioNote: "Relatively heat-stable and not water-soluble, so cooking losses are minimal (5\u201310%). Fat-soluble, so absorption increases when consumed with fat. Most vitamin D comes from sun exposure, not food, making it unique among vitamins." },
+  iron: { icon: "&#x1F4AA;", solubility: "Mineral", bodyFunction: "Central atom in hemoglobin, the protein in red blood cells that carries oxygen from lungs to every cell in the body. Also part of myoglobin (oxygen storage in muscles) and cytochromes (energy production in mitochondria).", importance: "Without iron, the body cannot produce enough healthy red blood cells, starving tissues of oxygen. Essential for cognitive development in children, physical performance, and immune defense.", deficiency: "Iron-deficiency anemia: the most common nutritional deficiency worldwide, affecting ~2 billion people. Causes fatigue, weakness, pale skin, cold hands and feet, brittle nails, poor concentration, and rapid heartbeat. In children, impairs cognitive development and learning.", deficiencyName: "Iron-deficiency anemia", bioNote: "Heme iron (animal sources) has 15\u201335% bioavailability. Non-heme iron (plant sources) has only 2\u201320% bioavailability. Vitamin C consumed at the same meal can increase non-heme iron absorption by 2\u20136x. Phytates, calcium, and tannins (tea/coffee) inhibit absorption. Cooking in cast iron cookware adds bioavailable iron to food." },
+  calcium: { icon: "&#x1F9B4;", solubility: "Mineral", bodyFunction: "The most abundant mineral in the body. 99% is stored in bones and teeth, providing structural strength. The remaining 1% is critical for muscle contraction, nerve transmission, blood clotting, and hormone secretion.", importance: "Bone density peaks around age 30; adequate calcium intake before that point determines lifelong bone strength. After 30, calcium intake slows the rate of age-related bone loss.", deficiency: "Hypocalcemia: muscle cramps, spasms, and tingling in fingers and lips. Long-term deficiency leads to osteopenia and osteoporosis (porous, brittle bones prone to fracture). Children can develop rickets. Severe cases cause seizures and abnormal heart rhythms.", deficiencyName: "Osteoporosis / Hypocalcemia", bioNote: "Absorption varies enormously by food source: dairy calcium is ~30% absorbed, spinach calcium is only ~5% (oxalates block it), broccoli calcium is ~50\u201360%. Vitamin D is required for calcium absorption. Heat-stable but leaches into cooking water. Consuming too much calcium at once reduces absorption efficiency \u2014 smaller doses throughout the day are better." },
+  potassium: { icon: "&#x1F34C;", solubility: "Mineral", bodyFunction: "The primary positive ion inside cells. Maintains fluid balance and cellular electrical charge. Critical for nerve impulse transmission, muscle contraction (including heartbeat rhythm), and kidney function.", importance: "Counteracts the blood-pressure-raising effects of sodium. Adequate potassium intake is linked to lower blood pressure, reduced stroke risk, and preserved bone mineral density.", deficiency: "Hypokalemia: muscle weakness, cramps, constipation, and fatigue. Moderate deficiency raises blood pressure. Severe deficiency causes dangerous cardiac arrhythmias (irregular heartbeat), respiratory failure, and can be life-threatening.", deficiencyName: "Hypokalemia", bioNote: "Heat-stable but highly water-soluble, making it very susceptible to leaching. Boiling potatoes can transfer up to 50% of potassium into the water. Steaming, baking, and microwaving preserve most potassium. If boiling, consuming the broth recaptures the mineral." },
+  fiber: { icon: "&#x1F35E;", solubility: "Macro", bodyFunction: "Indigestible plant carbohydrates that feed beneficial gut bacteria (prebiotic effect), add bulk to stool, and slow glucose absorption. Soluble fiber (oats, beans) lowers cholesterol by binding bile acids. Insoluble fiber (wheat bran, vegetables) promotes regular bowel movements.", importance: "Linked to reduced risk of heart disease, type 2 diabetes, colorectal cancer, and obesity. Supports a healthy gut microbiome, which influences immunity, mood, and nutrient absorption.", deficiency: "No specific deficiency disease, but chronically low fiber intake is associated with constipation, diverticular disease, increased colorectal cancer risk, poor blood sugar control, and elevated cholesterol. Most Americans consume only ~15g/day vs. the recommended 25\u201338g.", deficiencyName: "No named deficiency (associated with chronic disease risk)", bioNote: "Very stable through all forms of processing. Cooking can actually increase the proportion of resistant starch (a form of fiber) in foods like potatoes and rice when they are cooked and then cooled. Fiber is not \u201cabsorbed\u201d in the traditional sense but its health effects depend on reaching the colon intact." },
+  protein: { icon: "&#x1F969;", solubility: "Macro", bodyFunction: "Broken down into amino acids that are reassembled into the body\u2019s own proteins: enzymes, hormones (insulin, growth hormone), antibodies, structural proteins (collagen, keratin, actin, myosin), and transport proteins (hemoglobin, albumin).", importance: "Required for growth, tissue repair, immune defense, and virtually every metabolic process. Contains 9 essential amino acids that the body cannot synthesize and must obtain from food.", deficiency: "Kwashiorkor (protein deficiency with adequate calories): edema, distended belly, skin lesions, liver enlargement. Marasmus (protein + calorie deficiency): severe muscle wasting and emaciation. In milder form: poor wound healing, weakened immunity, hair loss, and muscle loss.", deficiencyName: "Kwashiorkor / Marasmus", bioNote: "Moderate cooking increases protein bioavailability by denaturing (unfolding) proteins, making them easier for digestive enzymes to break down. Raw egg protein is ~50% digestible; cooked egg protein is ~90% digestible. Excessive heat (charring) can reduce protein quality by destroying amino acids, particularly lysine." },
+};
+
+const PRESERVE_MECHANISMS = {
+  fresh_store: { title: "Fresh (Store-Bought)", howItWorks: "After harvest, produce continues to respire (consume its own sugars and nutrients for energy). Enzymatic reactions and microbial activity continue degrading nutrients throughout the supply chain.", whyChanges: "Vitamin C is oxidized by exposure to air. B vitamins degrade through enzymatic action. Each day of storage at room temperature accelerates these reactions. Refrigeration slows but does not stop nutrient degradation.", increases: "Certain fruits (tomatoes, bananas, avocados) continue to ripen after harvest, which can increase the bioavailability of some phytonutrients as cell walls soften.", decreases: "Water-soluble vitamins (C, B-complex) decline steadily. Folate is especially sensitive to light and air. After 5\u20137 days, fresh produce may contain significantly fewer vitamins than frozen produce." },
+  frozen: { title: "Frozen", howItWorks: "Produce is blanched (briefly heated to deactivate spoilage enzymes) and then flash-frozen to \u221218\u00b0C within hours of harvest. Ice crystals form inside cells, pausing all chemical reactions.", whyChanges: "Blanching causes an initial loss of heat-sensitive, water-soluble vitamins (especially vitamin C and folate). However, freezing halts further degradation, locking in the remaining nutrients at near-harvest levels.", increases: "By stopping enzymatic degradation, freezing preserves nutrients better than days of refrigerated storage. Some frozen vegetables contain more vitamin C than \u201cfresh\u201d supermarket produce after 5 days.", decreases: "The blanching step causes 10\u201325% loss of vitamin C and 20\u201325% loss of folate. Minerals may leach slightly into blanching water. Long-term freezer storage (6+ months) causes slow oxidative losses." },
+  canned: { title: "Canned", howItWorks: "Food is sealed in airtight containers and heated to high temperatures (typically 115\u2013120\u00b0C) to kill bacteria and deactivate enzymes. This is the most thermally intense preservation method.", whyChanges: "Sustained high heat destroys a significant portion of heat-sensitive vitamins. Water-soluble nutrients leach into the canning liquid. However, the sealed anaerobic environment prevents further oxidative loss during storage.", increases: "Heat breaks down cell walls, increasing the bioavailability of lycopene in tomatoes (2\u20133x increase) and some minerals. Canned foods have a very long shelf life (2\u20135 years) with minimal additional nutrient loss.", decreases: "Vitamin C losses of 50\u201380%. B vitamins (especially thiamin and folate) decline 30\u201370%. Minerals leach into the liquid \u2014 consuming the liquid recaptures a large portion." },
+  room_temp: { title: "Room Temperature (5+ days)", howItWorks: "Produce sits at ambient temperature (~20\u201325\u00b0C), accelerating all degradation pathways: enzymatic browning, microbial growth, cellular respiration, and oxidation. This is the least protective storage condition.", whyChanges: "Higher temperature dramatically increases the rate of chemical reactions that destroy vitamins. Vitamin C oxidizes rapidly. Folate degrades through oxidation. Produce loses moisture, concentrating some nutrients but losing water-soluble ones.", increases: "Minimal. Some phytonutrient concentrations may appear to increase as water evaporates, but the absolute amounts decline.", decreases: "Vitamin C can drop 45\u201350% after 5 days at room temperature. Folate, thiamin, and B6 all decline measurably." },
+};
+
+const COOK_MECHANISMS = {
+  boiling: { title: "Boiling", howItWorks: "Food is fully submerged in water at 100\u00b0C. Two nutrient-loss mechanisms combine: thermal degradation (heat breaks down sensitive vitamins) and leaching (water-soluble nutrients dissolve into cooking water).", whyChanges: "The large volume of water maximizes leaching. Vitamin C, B vitamins, and potassium migrate into the water. Longer boiling and more water = greater losses.", increases: "Breaks down cell walls, increasing bioaccessibility of beta-carotene and lycopene. Destroys some anti-nutrients (goitrogens, lectins) that interfere with nutrient absorption.", decreases: "Up to 60\u201370% of vitamin C, 40\u201360% of folate, and 30\u201340% of potassium can be lost. The nutrients are in the water \u2014 using it in soups recovers them." },
+  steaming: { title: "Steaming", howItWorks: "Food is cooked by steam without direct contact with liquid water. This eliminates leaching while still providing heat to break down cell walls.", whyChanges: "Water-soluble nutrients stay inside the food. Heat still causes some thermal degradation of vitamin C and folate, but losses are much smaller than boiling.", increases: "Softens cell walls for better nutrient release while minimizing water-soluble losses. Retains most minerals and B vitamins. Often considered the best method for overall nutrient bioavailability.", decreases: "Some thermal loss of vitamin C (10\u201325%) and folate (15\u201325%). Extended steaming increases these losses." },
+  microwaving: { title: "Microwaving", howItWorks: "Microwave radiation excites water molecules within food, generating heat rapidly. Short cooking times and little or no added water minimize both thermal exposure and leaching.", whyChanges: "Short times = less heat damage. No water submersion = no leaching. Food heats unevenly, so some areas may be overcooked.", increases: "Consistently shown to preserve the most vitamin C and folate of any cooking method. Quick heating preserves heat-sensitive nutrients.", decreases: "Slight vitamin C loss (10\u201315%) from thermal degradation. Vitamin K retention varies." },
+  roasting: { title: "Roasting / Baking", howItWorks: "Dry heat in an oven at 150\u2013230\u00b0C. No water contact eliminates leaching. High surface temperatures cause Maillard reactions (browning).", whyChanges: "No water-based leaching preserves minerals well. Prolonged high temperatures degrade heat-sensitive vitamins. Outer surfaces experience the most nutrient loss.", increases: "Cell wall breakdown improves carotenoid bioaccessibility. Excellent for preserving mineral content. Maillard products may have antioxidant properties.", decreases: "Moderate vitamin C loss (20\u201330%). Some folate and thiamin breakdown. Charring destroys amino acids and can create harmful compounds (acrylamide)." },
+  stir_fry: { title: "Stir-Frying", howItWorks: "Very high heat (200\u2013300\u00b0C) for a very short time, with a small amount of oil. Combines intense heat, brief duration, and fat.", whyChanges: "Short time limits thermal damage. No water = no leaching. Oil increases absorption of fat-soluble vitamins and carotenoids.", increases: "Oil enhances fat-soluble vitamin bioavailability (beta-carotene absorption can increase 5\u201310x). Brief cooking preserves most B vitamins.", decreases: "Some vitamin C loss (25\u201330%) at extreme surface temperatures." },
+  raw: { title: "Raw / No Cooking", howItWorks: "No heat processing. Food is consumed in its natural state, preserving all heat-sensitive nutrients but leaving plant cell walls intact.", whyChanges: "Zero thermal degradation, zero leaching. But many nutrients trapped inside plant cells remain partially inaccessible since human enzymes cannot fully break down cellulose.", increases: "Maximum vitamin C and folate retention. Ideal for heat-sensitive, readily bioaccessible nutrients (vitamin C in bell peppers, folate in leafy greens).", decreases: "Reduced bioaccessibility of carotenoids locked in cell walls (raw carrots yield only 3\u20134% of their beta-carotene). Anti-nutrients (phytates, oxalates, lectins) remain active. Raw egg protein is only ~50% digestible vs. ~90% cooked." },
+};
+
+const TRANSPORT = { vitC: 80, vitA: 92, thiamin: 90, riboflavin: 95, niacin: 95, vitB6: 90, folate: 85, vitD: 98, iron: 100, calcium: 100, potassium: 100, fiber: 100, protein: 100 };
+
+const PRESERVE = {
+  fresh_store: { label: "Fresh (store-bought)", icon: "&#x1F6D2;", vitC: 90, vitA: 95, thiamin: 95, riboflavin: 97, niacin: 97, vitB6: 95, folate: 90, vitD: 99, iron: 100, calcium: 100, potassium: 100, fiber: 100, protein: 100 },
+  frozen: { label: "Frozen", icon: "&#x2744;&#xFE0F;", vitC: 80, vitA: 93, thiamin: 80, riboflavin: 90, niacin: 92, vitB6: 78, folate: 75, vitD: 98, iron: 97, calcium: 97, potassium: 95, fiber: 100, protein: 100 },
+  canned: { label: "Canned", icon: "&#x1F96B;", vitC: 48, vitA: 58, thiamin: 50, riboflavin: 60, niacin: 65, vitB6: 55, folate: 45, vitD: 95, iron: 80, calcium: 78, potassium: 70, fiber: 95, protein: 97 },
+  room_temp: { label: "Room temp (5+ days)", icon: "&#x1F321;&#xFE0F;", vitC: 55, vitA: 78, thiamin: 80, riboflavin: 88, niacin: 90, vitB6: 80, folate: 65, vitD: 95, iron: 100, calcium: 100, potassium: 100, fiber: 100, protein: 100 },
+};
+
+const COOK = {
+  boiling: { label: "Boiling", icon: "&#x1F4A7;", vitC: 40, vitA: 75, thiamin: 55, riboflavin: 70, niacin: 65, vitB6: 55, folate: 40, vitD: 90, iron: 65, calcium: 70, potassium: 60, fiber: 98, protein: 95 },
+  steaming: { label: "Steaming", icon: "&#x2668;&#xFE0F;", vitC: 80, vitA: 90, thiamin: 85, riboflavin: 90, niacin: 88, vitB6: 85, folate: 75, vitD: 95, iron: 95, calcium: 95, potassium: 93, fiber: 100, protein: 98 },
+  microwaving: { label: "Microwaving", icon: "&#x26A1;", vitC: 85, vitA: 92, thiamin: 85, riboflavin: 92, niacin: 90, vitB6: 88, folate: 80, vitD: 95, iron: 97, calcium: 97, potassium: 95, fiber: 100, protein: 98 },
+  roasting: { label: "Roasting / Baking", icon: "&#x1F525;", vitC: 70, vitA: 85, thiamin: 78, riboflavin: 85, niacin: 82, vitB6: 78, folate: 65, vitD: 92, iron: 92, calcium: 95, potassium: 90, fiber: 100, protein: 95 },
+  stir_fry: { label: "Stir-Frying", icon: "&#x1F958;", vitC: 72, vitA: 88, thiamin: 80, riboflavin: 88, niacin: 85, vitB6: 80, folate: 68, vitD: 93, iron: 95, calcium: 95, potassium: 92, fiber: 100, protein: 97 },
+  raw: { label: "Raw / No cooking", icon: "&#x1F957;", vitC: 100, vitA: 100, thiamin: 100, riboflavin: 100, niacin: 100, vitB6: 100, folate: 100, vitD: 100, iron: 100, calcium: 100, potassium: 100, fiber: 100, protein: 100 },
+};
+
+// ============================================================
+// STATE & TABS
+// ============================================================
+let selectedNutrient = 'vitC';
+let selectedPreserve = 'fresh_store';
+let selectedCook = 'boiling';
+let chart = null;
+let chartNeedsRender = true;
+
+function switchTab(tabId) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.toggle('active', p.id === 'tab-' + tabId));
+  if (tabId === 'deepdive' && chartNeedsRender) {
+    // Defer chart render until canvas is visible
+    setTimeout(() => { renderChart(); chartNeedsRender = false; }, 50);
+  }
+}
+
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+});
+
+// ============================================================
+// BUILD UI
+// ============================================================
+function buildPills() {
+  const nc = document.getElementById('nutrient-pills');
+  const pc = document.getElementById('preserve-pills');
+  const cc = document.getElementById('cook-pills');
+
+  for (const [key, n] of Object.entries(NUTRIENTS)) {
+    const pill = document.createElement('button');
+    pill.className = `pill ${n.category}`; pill.textContent = n.name; pill.dataset.key = key;
+    if (key === selectedNutrient) pill.classList.add('active');
+    pill.addEventListener('click', () => { selectedNutrient = key; updateActivePills(nc, key); chartNeedsRender = true; render(); });
+    nc.appendChild(pill);
+  }
+  for (const [key, p] of Object.entries(PRESERVE)) {
+    const pill = document.createElement('button');
+    pill.className = 'pill preserve'; pill.innerHTML = p.icon + ' ' + p.label; pill.dataset.key = key;
+    if (key === selectedPreserve) pill.classList.add('active');
+    pill.addEventListener('click', () => { selectedPreserve = key; updateActivePills(pc, key); chartNeedsRender = true; render(); });
+    pc.appendChild(pill);
+  }
+  for (const [key, c] of Object.entries(COOK)) {
+    const pill = document.createElement('button');
+    pill.className = 'pill cook'; pill.innerHTML = c.icon + ' ' + c.label; pill.dataset.key = key;
+    if (key === selectedCook) pill.classList.add('active');
+    pill.addEventListener('click', () => { selectedCook = key; updateActivePills(cc, key); chartNeedsRender = true; render(); });
+    cc.appendChild(pill);
+  }
+}
+
+function updateActivePills(container, activeKey) {
+  container.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.key === activeKey));
+}
+
+// ============================================================
+// RENDER
+// ============================================================
+function retentionColor(pct) { return pct >= 70 ? '#2e7d32' : pct >= 40 ? '#ff9800' : '#e53935'; }
+function cellClass(pct) { return pct >= 70 ? 'cell-high' : pct >= 40 ? 'cell-medium' : 'cell-low'; }
+function categoryColor(cat) { return cat === 'vitamin' ? '#e65100' : cat === 'mineral' ? '#1976d2' : '#7b1fa2'; }
+
+function calcStages(nk, pk, ck) {
+  const h = 100, t = Math.round(h * TRANSPORT[nk] / 100), p = Math.round(t * PRESERVE[pk][nk] / 100), c = Math.round(p * COOK[ck][nk] / 100);
+  return { harvest: h, afterTransport: t, afterPreserve: p, afterCook: c };
+}
+
+function renderJourney() {
+  const pipeline = document.getElementById('journey-pipeline');
+  const s = calcStages(selectedNutrient, selectedPreserve, selectedCook);
+  const pM = PRESERVE[selectedPreserve], cM = COOK[selectedCook], nN = NUTRIENTS[selectedNutrient].name;
+  document.getElementById('nutrient-name-label').textContent = nN;
+  const el = document.getElementById('chart-nutrient-label');
+  if (el) el.textContent = nN;
+
+  const stages = [
+    { icon: '&#x1F33E;', label: 'At Harvest', value: s.harvest, detail: '100% of original nutrient' },
+    { icon: '&#x1F69A;', label: 'After Transport (3\u20135 days)', value: s.afterTransport, detail: `${TRANSPORT[selectedNutrient]}% retained at this stage` },
+    { icon: pM.icon, label: pM.label, value: s.afterPreserve, detail: `${PRESERVE[selectedPreserve][selectedNutrient]}% retained at this stage` },
+    { icon: cM.icon, label: cM.label, value: s.afterCook, detail: `${COOK[selectedCook][selectedNutrient]}% retained at this stage` },
+  ];
+  let html = '';
+  stages.forEach((st, i) => {
+    if (i > 0) html += '<div class="journey-arrow">&rarr;</div>';
+    const c = retentionColor(st.value);
+    html += `<div class="journey-stage animate-in" style="animation-delay:${i*0.12}s;background:${c}10;border:2px solid ${c}30;"><div class="stage-icon">${st.icon}</div><div class="stage-label">${st.label}</div><div class="stage-value" style="color:${c};">${st.value}%</div><div class="stage-detail">${st.detail}</div><div class="retention-bar-container"><div class="retention-bar" style="width:${st.value}%;background:${c};"></div></div></div>`;
+  });
+  pipeline.innerHTML = html;
+}
+
+function renderNutrientDetail() {
+  const el = document.getElementById('nutrient-detail'), n = NUTRIENTS[selectedNutrient], info = NUTRIENT_INFO[selectedNutrient], bg = categoryColor(n.category);
+  el.innerHTML = `<div class="nutrient-detail-header"><div class="nd-icon" style="background:${bg};">${info.icon}</div><div><h3>${n.name}</h3><div class="nd-subtitle">${info.solubility} &middot; ${n.unit}</div></div></div><div class="nd-col"><h4 class="fn-label">&#x2699;&#xFE0F; What It Does in Your Body</h4><p>${info.bodyFunction}</p></div><div class="nd-col"><h4 class="imp-label">&#x1F4A1; Why It Matters</h4><p>${info.importance}</p></div><div class="nd-col"><h4 class="def-label">&#x26A0;&#xFE0F; What Happens Without It</h4><p>${info.deficiency}</p><div class="deficiency-name">${info.deficiencyName}</div><div class="bioavail-note"><strong>Bioavailability note:</strong> ${info.bioNote}</div></div>`;
+}
+
+function renderProcessMechanism() {
+  const el = document.getElementById('process-mechanism'), pm = PRESERVE_MECHANISMS[selectedPreserve], cm = COOK_MECHANISMS[selectedCook];
+  el.innerHTML = `<h2 class="section-title">Why These Processes Change Bioavailability</h2><p class="section-desc">Understanding the <em>mechanisms</em> behind nutrient changes helps you make better food preparation choices.</p><div class="mechanism-content"><div><h3 style="font-size:1.1rem;margin-bottom:0.75rem;color:var(--teal);">${PRESERVE[selectedPreserve].icon} ${pm.title}</h3><div class="mechanism-card neutral" style="margin-bottom:0.75rem;"><h4>&#x1F52C; How it works</h4><p>${pm.howItWorks}</p></div><div class="mechanism-card neutral" style="margin-bottom:0.75rem;"><h4>&#x2753; Why nutrients change</h4><p>${pm.whyChanges}</p></div><div class="mechanism-card increases" style="margin-bottom:0.75rem;"><h4>&#x2B06;&#xFE0F; What it can increase</h4><p>${pm.increases}</p></div><div class="mechanism-card decreases"><h4>&#x2B07;&#xFE0F; What it decreases</h4><p>${pm.decreases}</p></div></div><div><h3 style="font-size:1.1rem;margin-bottom:0.75rem;color:var(--orange);">${COOK[selectedCook].icon} ${cm.title}</h3><div class="mechanism-card neutral" style="margin-bottom:0.75rem;"><h4>&#x1F52C; How it works</h4><p>${cm.howItWorks}</p></div><div class="mechanism-card neutral" style="margin-bottom:0.75rem;"><h4>&#x2753; Why nutrients change</h4><p>${cm.whyChanges}</p></div><div class="mechanism-card increases" style="margin-bottom:0.75rem;"><h4>&#x2B06;&#xFE0F; What it can increase</h4><p>${cm.increases}</p></div><div class="mechanism-card decreases"><h4>&#x2B07;&#xFE0F; What it decreases</h4><p>${cm.decreases}</p></div></div></div>`;
+}
+
+function renderChart() {
+  const canvas = document.getElementById('comparison-chart');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const pKeys = Object.keys(PRESERVE), cKeys = Object.keys(COOK);
+  const datasets = [], colors = ['#1a5c2e','#2d8a4e','#4caf50','#ff9800','#e53935','#1976d2'];
+  cKeys.forEach((ck, ci) => {
+    datasets.push({ label: COOK[ck].label, data: pKeys.map(pk => calcStages(selectedNutrient, pk, ck).afterCook), backgroundColor: colors[ci]+'88', borderColor: colors[ci], borderWidth: 1.5, borderRadius: 4 });
+  });
+  if (chart) chart.destroy();
+  chart = new Chart(ctx, { type: 'bar', data: { labels: pKeys.map(k => PRESERVE[k].label), datasets }, options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true, max: 100, title: { display: true, text: '% Bioavailable (of original at harvest)' }, grid: { color: '#eee' } }, x: { grid: { display: false } } }, plugins: { legend: { position: 'top' }, tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.y}% bioavailable` } } } } });
+}
+
+function renderRefTable() {
+  const tbody = document.getElementById('ref-table-body'), cKeys = ['boiling','steaming','microwaving','roasting','stir_fry','raw'];
+  let html = '';
+  for (const [nk, n] of Object.entries(NUTRIENTS)) {
+    html += `<tr><td>${n.name}</td>`;
+    cKeys.forEach(ck => { const v = COOK[ck][nk]; html += `<td><span class="cell-badge ${cellClass(v)}">${v}%</span></td>`; });
+    html += '</tr>';
+  }
+  tbody.innerHTML = html;
+}
+
+function render() {
+  renderJourney();
+  renderNutrientDetail();
+  renderProcessMechanism();
+  // If deep dive tab is active, re-render the chart too
+  if (document.getElementById('tab-deepdive').classList.contains('active')) renderChart();
+}
+
+// ============================================================
+// INIT
+// ============================================================
+buildPills();
+renderRefTable();
+render();
+</script>
+</body>
+</html>
