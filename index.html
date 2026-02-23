@@ -150,6 +150,41 @@
     .mechanism-card.decreases h4 { color: #e65100; }
     .mechanism-card.neutral { background: #f3f3f3; border-color: #e0e0e0; }
 
+    /* FOODS TAB */
+    .food-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 0.75rem; margin-bottom: 1.5rem; }
+    .food-card {
+      background: var(--card-bg); border: 2px solid #e0e0e0; border-radius: var(--radius);
+      padding: 0.9rem 0.75rem; text-align: center; cursor: pointer;
+      transition: all 0.2s; user-select: none;
+    }
+    .food-card:hover { border-color: var(--green-light); background: #f0f9f0; transform: translateY(-2px); box-shadow: var(--shadow); }
+    .food-card.active { border-color: var(--green-mid); background: #e8f5e9; }
+    .food-card .food-icon { font-size: 2rem; margin-bottom: 0.3rem; }
+    .food-card .food-name { font-size: 0.82rem; font-weight: 600; color: var(--text); }
+    .food-card .food-cat { font-size: 0.7rem; color: var(--text-light); text-transform: uppercase; letter-spacing: 0.04em; }
+    .food-detail-panel { background: var(--card-bg); border-radius: var(--radius); padding: 1.75rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+    .food-header { display: flex; align-items: center; gap: 1rem; margin-bottom: 1.25rem; padding-bottom: 1rem; border-bottom: 2px solid #eee; }
+    .food-header .fh-icon { font-size: 2.5rem; }
+    .food-header h3 { font-size: 1.3rem; font-weight: 700; }
+    .food-header .fh-meta { font-size: 0.85rem; color: var(--text-light); }
+    .food-header .fh-note { font-size: 0.82rem; color: #5d4037; background: #fff8e1; padding: 0.4rem 0.7rem; border-radius: 8px; border-left: 3px solid var(--orange); margin-top: 0.3rem; }
+    .nutrient-bars { margin-bottom: 0.5rem; }
+    .nb-row { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.6rem; }
+    .nb-label { width: 130px; font-size: 0.82rem; font-weight: 500; flex-shrink: 0; text-align: right; }
+    .nb-bar-wrap { flex: 1; height: 18px; background: #eee; border-radius: 9px; overflow: hidden; position: relative; }
+    .nb-bar { height: 100%; border-radius: 9px; transition: width 0.5s ease; min-width: 2px; }
+    .nb-value { width: 100px; font-size: 0.78rem; color: var(--text-light); flex-shrink: 0; }
+    @media (max-width: 600px) { .nb-label { width: 90px; font-size: 0.75rem; } .nb-value { width: 80px; } }
+    .food-impact { background: var(--card-bg); border-radius: var(--radius); padding: 1.75rem; box-shadow: var(--shadow); margin-bottom: 1.5rem; }
+    .food-impact h2 { margin-bottom: 0.25rem; }
+    .food-selectors { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+    @media (max-width: 700px) { .food-selectors { grid-template-columns: 1fr; } }
+    .impact-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; }
+    .impact-table th, .impact-table td { padding: 0.55rem 0.75rem; text-align: left; font-size: 0.85rem; border-bottom: 1px solid #eee; }
+    .impact-table th { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-light); background: #fafafa; position: sticky; top: 0; }
+    .impact-table td:first-child { font-weight: 500; }
+    .impact-arrow { color: var(--text-light); font-size: 0.9rem; }
+
     /* INSIGHTS */
     .insights-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; margin-bottom: 2rem; }
     .insight-card { background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem; box-shadow: var(--shadow); border-left: 4px solid var(--green-mid); }
@@ -220,6 +255,7 @@
 <div class="tab-bar">
   <button class="tab-btn active" data-tab="explore"><span class="tab-icon">&#x1F50D;</span> Explore</button>
   <button class="tab-btn" data-tab="deepdive"><span class="tab-icon">&#x1F4DA;</span> Deep Dive</button>
+  <button class="tab-btn" data-tab="foods"><span class="tab-icon">&#x1F37D;&#xFE0F;</span> Foods</button>
 </div>
 
 <!-- ===== TAB 1: EXPLORE ===== -->
@@ -373,6 +409,48 @@
 </div>
 </div>
 
+<!-- ===== TAB 3: FOODS ===== -->
+<div class="tab-panel" id="tab-foods">
+<div class="container">
+
+  <div class="quick-intro">
+    <div class="qi-icon">&#x1F37D;&#xFE0F;</div>
+    <p>Start with a <strong>food you actually eat</strong> and see what nutrients it delivers &mdash; then explore how preservation and cooking change what your body absorbs. Pick a food below to begin.</p>
+  </div>
+
+  <!-- Category filter + food grid -->
+  <div style="margin-bottom:0.75rem;">
+    <h2 class="section-title">Pick a Food</h2>
+    <div class="pill-group" id="food-category-pills"></div>
+  </div>
+  <div class="food-grid" id="food-grid"></div>
+
+  <!-- Selected food detail -->
+  <div class="food-detail-panel" id="food-detail"></div>
+
+  <!-- Preservation & cooking impact -->
+  <div class="food-impact" id="food-impact">
+    <h2 class="section-title">What Happens After Harvest?</h2>
+    <p class="section-desc">Choose a preservation and cooking method to see how each nutrient changes through the full pipeline.</p>
+    <div class="food-selectors">
+      <div class="selector-panel">
+        <h3><span class="icon">&#x1F4E6;</span> Preservation</h3>
+        <div class="pill-group" id="food-preserve-pills"></div>
+      </div>
+      <div class="selector-panel">
+        <h3><span class="icon">&#x1F373;</span> Cooking</h3>
+        <div class="pill-group" id="food-cook-pills"></div>
+      </div>
+    </div>
+    <table class="impact-table" id="food-impact-table">
+      <thead><tr><th>Nutrient</th><th>Raw Amount</th><th></th><th>After Processing</th><th>Retained</th></tr></thead>
+      <tbody id="food-impact-body"></tbody>
+    </table>
+  </div>
+
+</div>
+</div>
+
 <footer>
   <p>SES Class &mdash; Food &amp; Nutrition Bioavailability Infographic &mdash; Data compiled from peer-reviewed sources, Feb 2025</p>
 </footer>
@@ -450,6 +528,109 @@ const COOK = {
 };
 
 // ============================================================
+// FOODS DATA (USDA FoodData Central reference values per serving)
+// ============================================================
+const DAILY_VALUES = {
+  vitC: 90, vitA: 900, thiamin: 1.2, riboflavin: 1.3, niacin: 16, vitB6: 1.7,
+  folate: 400, vitD: 20, iron: 18, calcium: 1300, potassium: 4700, fiber: 28, protein: 50
+};
+
+const FOODS = {
+  broccoli: { name: 'Broccoli', icon: '&#x1F966;', category: 'produce', serving: '1 cup chopped, cooked (156g)',
+    nutrients: { vitC: 101, vitA: 120, thiamin: 0.1, riboflavin: 0.18, niacin: 0.86, vitB6: 0.22, folate: 168, vitD: 0, iron: 1.0, calcium: 62, potassium: 457, fiber: 5.1, protein: 3.7 },
+    notes: 'Steaming preserves the most vitamin C. Broccoli calcium is ~60% bioavailable — much higher than spinach.' },
+  spinach: { name: 'Spinach', icon: '&#x1F96C;', category: 'produce', serving: '1 cup cooked (180g)',
+    nutrients: { vitC: 17.6, vitA: 943, thiamin: 0.17, riboflavin: 0.42, niacin: 0.88, vitB6: 0.44, folate: 263, vitD: 0, iron: 6.4, calcium: 245, potassium: 839, fiber: 4.3, protein: 5.3 },
+    notes: 'High in iron and calcium on paper, but oxalates block ~95% of calcium and reduce iron absorption. Pair with vitamin C.' },
+  sweet_potato: { name: 'Sweet Potato', icon: '&#x1F360;', category: 'produce', serving: '1 medium baked (114g)',
+    nutrients: { vitC: 19.6, vitA: 1096, thiamin: 0.1, riboflavin: 0.1, niacin: 1.5, vitB6: 0.29, folate: 6, vitD: 0, iron: 0.7, calcium: 38, potassium: 542, fiber: 3.8, protein: 2.1 },
+    notes: 'Extraordinary vitamin A (beta-carotene). Cooking with a little fat dramatically increases carotenoid absorption.' },
+  tomato: { name: 'Tomato', icon: '&#x1F345;', category: 'produce', serving: '1 medium raw (123g)',
+    nutrients: { vitC: 16.9, vitA: 51, thiamin: 0.05, riboflavin: 0.02, niacin: 0.73, vitB6: 0.1, folate: 18.5, vitD: 0, iron: 0.3, calcium: 12, potassium: 292, fiber: 1.5, protein: 1.1 },
+    notes: 'Cooking increases lycopene bioavailability 2-3x by breaking cell walls. Canned tomatoes are more lycopene-rich than fresh.' },
+  bell_pepper: { name: 'Red Bell Pepper', icon: '&#x1FAD1;', category: 'produce', serving: '1 medium raw (119g)',
+    nutrients: { vitC: 152, vitA: 187, thiamin: 0.05, riboflavin: 0.1, niacin: 1.2, vitB6: 0.33, folate: 55, vitD: 0, iron: 0.5, calcium: 8, potassium: 251, fiber: 2.5, protein: 1.2 },
+    notes: 'One of the highest vitamin C foods — nearly 3x an orange. Best eaten raw or lightly stir-fried to preserve vitamin C.' },
+  chicken: { name: 'Chicken Breast', icon: '&#x1F357;', category: 'meat', serving: '3 oz cooked (85g)',
+    nutrients: { vitC: 0, vitA: 6, thiamin: 0.06, riboflavin: 0.1, niacin: 11.4, vitB6: 0.53, folate: 3, vitD: 0.1, iron: 0.4, calcium: 11, potassium: 220, fiber: 0, protein: 26 },
+    notes: 'Excellent niacin and B6 source. Moderate cooking preserves protein quality; charring destroys amino acids.' },
+  beef_steak: { name: 'Beef Steak', icon: '&#x1F969;', category: 'meat', serving: '3 oz cooked, sirloin (85g)',
+    nutrients: { vitC: 0, vitA: 0, thiamin: 0.07, riboflavin: 0.14, niacin: 6.2, vitB6: 0.55, folate: 6, vitD: 0.1, iron: 2.6, calcium: 18, potassium: 315, fiber: 0, protein: 26 },
+    notes: 'Heme iron (15-35% absorbed) — far more bioavailable than plant iron. Red meat is the top dietary iron source.' },
+  salmon: { name: 'Salmon', icon: '&#x1F41F;', category: 'meat', serving: '3 oz cooked (85g)',
+    nutrients: { vitC: 0, vitA: 10, thiamin: 0.02, riboflavin: 0.11, niacin: 8.6, vitB6: 0.64, folate: 5, vitD: 14.2, iron: 0.3, calcium: 12, potassium: 326, fiber: 0, protein: 22 },
+    notes: 'One of the best food sources of vitamin D. The fat in salmon enhances its own fat-soluble vitamin absorption.' },
+  eggs: { name: 'Eggs', icon: '&#x1F95A;', category: 'dairy', serving: '2 large, cooked (100g)',
+    nutrients: { vitC: 0, vitA: 160, thiamin: 0.04, riboflavin: 0.46, niacin: 0.08, vitB6: 0.17, folate: 47, vitD: 2.0, iron: 1.8, calcium: 56, potassium: 138, fiber: 0, protein: 13 },
+    notes: 'Cooking nearly doubles protein digestibility (50% raw → 90% cooked). Egg yolks provide most of the vitamins.' },
+  milk: { name: 'Milk (whole)', icon: '&#x1F95B;', category: 'dairy', serving: '1 cup (244ml)',
+    nutrients: { vitC: 0, vitA: 68, thiamin: 0.05, riboflavin: 0.45, niacin: 0.22, vitB6: 0.09, folate: 12, vitD: 3.2, iron: 0.07, calcium: 276, potassium: 322, fiber: 0, protein: 8 },
+    notes: 'Dairy calcium is ~30% bioavailable. Riboflavin degrades rapidly in light — opaque containers preserve it.' },
+  pasta: { name: 'Pasta (enriched)', icon: '&#x1F35D;', category: 'grain', serving: '1 cup cooked (140g)',
+    nutrients: { vitC: 0, vitA: 0, thiamin: 0.29, riboflavin: 0.14, niacin: 2.3, vitB6: 0.05, folate: 167, vitD: 0, iron: 1.8, calcium: 10, potassium: 62, fiber: 2.5, protein: 8.1 },
+    notes: 'Enriched with thiamin, iron, and folate by law. Cooking in large water volumes leaches B vitamins — use less water.' },
+  brown_rice: { name: 'Brown Rice', icon: '&#x1F35A;', category: 'grain', serving: '1 cup cooked (195g)',
+    nutrients: { vitC: 0, vitA: 0, thiamin: 0.2, riboflavin: 0.02, niacin: 2.6, vitB6: 0.15, folate: 8, vitD: 0, iron: 0.8, calcium: 20, potassium: 154, fiber: 3.5, protein: 5.5 },
+    notes: 'Phytates in the bran reduce mineral absorption. Soaking before cooking can reduce phytate content by 30-50%.' },
+  lentils: { name: 'Lentils', icon: '&#x1FAD8;', category: 'legume', serving: '1 cup cooked (198g)',
+    nutrients: { vitC: 3, vitA: 8, thiamin: 0.33, riboflavin: 0.14, niacin: 2.1, vitB6: 0.35, folate: 358, vitD: 0, iron: 6.6, calcium: 38, potassium: 731, fiber: 15.6, protein: 17.9 },
+    notes: 'Outstanding folate source. Non-heme iron — pairing with vitamin C (lemon juice, tomatoes) boosts absorption 2-6x.' },
+  black_beans: { name: 'Black Beans', icon: '&#x1FAD8;', category: 'legume', serving: '1 cup cooked (172g)',
+    nutrients: { vitC: 0, vitA: 3, thiamin: 0.42, riboflavin: 0.1, niacin: 0.87, vitB6: 0.12, folate: 256, vitD: 0, iron: 3.6, calcium: 46, potassium: 611, fiber: 15, protein: 15.2 },
+    notes: 'Soaking and cooking destroys lectins and reduces phytates, significantly improving mineral bioavailability.' },
+  // Processed & prepared foods
+  cheddar: { name: 'Cheddar Cheese', icon: '&#x1F9C0;', category: 'processed', serving: '1.5 oz / 42g',
+    nutrients: { vitC: 0, vitA: 128, thiamin: 0.01, riboflavin: 0.16, niacin: 0.04, vitB6: 0.03, folate: 8, vitD: 0.4, iron: 0.3, calcium: 307, potassium: 41, fiber: 0, protein: 10.5 },
+    notes: 'Calcium bioavailability from cheese is ~30-35%, similar to milk. Aging concentrates minerals but destroys most B vitamins.' },
+  yogurt: { name: 'Greek Yogurt', icon: '&#x1F95B;', category: 'processed', serving: '1 cup / 245g',
+    nutrients: { vitC: 0, vitA: 22, thiamin: 0.07, riboflavin: 0.53, niacin: 0.3, vitB6: 0.15, folate: 30, vitD: 0, iron: 0.2, calcium: 230, potassium: 350, fiber: 0, protein: 22 },
+    notes: 'Fermentation increases B vitamin bioavailability. Probiotics may enhance mineral absorption in the gut.' },
+  bacon: { name: 'Bacon', icon: '&#x1F953;', category: 'processed', serving: '3 slices cooked (34g)',
+    nutrients: { vitC: 0, vitA: 0, thiamin: 0.13, riboflavin: 0.06, niacin: 3.2, vitB6: 0.13, folate: 1, vitD: 0.2, iron: 0.4, calcium: 5, potassium: 172, fiber: 0, protein: 10.4 },
+    notes: 'Curing with nitrates preserves B vitamins well. High-heat cooking (crisping) causes significant thiamin losses.' },
+  peanut_butter: { name: 'Peanut Butter', icon: '&#x1F95C;', category: 'processed', serving: '2 tbsp (32g)',
+    nutrients: { vitC: 0, vitA: 0, thiamin: 0.04, riboflavin: 0.03, niacin: 4.3, vitB6: 0.18, folate: 29, vitD: 0, iron: 0.6, calcium: 17, potassium: 189, fiber: 1.6, protein: 7.1 },
+    notes: 'Roasting peanuts increases niacin bioavailability. Phytates reduce iron and zinc absorption — pairing with vitamin C helps.' },
+  tofu: { name: 'Tofu (firm)', icon: '&#x1F9C8;', category: 'processed', serving: '1/2 cup (126g)',
+    nutrients: { vitC: 0.2, vitA: 9, thiamin: 0.15, riboflavin: 0.06, niacin: 0.2, vitB6: 0.06, folate: 19, vitD: 0, iron: 6.6, calcium: 253, potassium: 150, fiber: 0.4, protein: 10 },
+    notes: 'Calcium-set tofu is a good calcium source (~30% bioavailable). Fermentation reduces phytates, improving mineral absorption.' },
+  bread_white: { name: 'White Bread', icon: '&#x1F35E;', category: 'processed', serving: '2 slices (50g)',
+    nutrients: { vitC: 0, vitA: 0, thiamin: 0.23, riboflavin: 0.14, niacin: 2.4, vitB6: 0.04, folate: 54, vitD: 0, iron: 1.6, calcium: 52, potassium: 50, fiber: 1.2, protein: 4.5 },
+    notes: 'Enriched with thiamin, riboflavin, niacin, iron, and folate. Baking destroys 15-20% of thiamin. Whole wheat has more fiber but also more phytates.' },
+  oatmeal: { name: 'Oatmeal', icon: '&#x1F35A;', category: 'processed', serving: '1 cup cooked (234g)',
+    nutrients: { vitC: 0, vitA: 0, thiamin: 0.15, riboflavin: 0.03, niacin: 0.5, vitB6: 0.01, folate: 14, vitD: 0, iron: 2.1, calcium: 21, potassium: 143, fiber: 4.0, protein: 5.9 },
+    notes: 'Soluble fiber (beta-glucan) lowers cholesterol. Phytates in oats reduce iron absorption — adding berries (vitamin C) helps.' },
+  canned_tuna: { name: 'Canned Tuna', icon: '&#x1F96B;', category: 'processed', serving: '3 oz drained (85g)',
+    nutrients: { vitC: 0, vitA: 20, thiamin: 0.03, riboflavin: 0.07, niacin: 11.3, vitB6: 0.18, folate: 2, vitD: 1.7, iron: 1.3, calcium: 12, potassium: 201, fiber: 0, protein: 20 },
+    notes: 'Canning destroys some B vitamins but protein remains highly bioavailable. Draining the liquid loses water-soluble nutrients.' },
+  hot_dog: { name: 'Hot Dog', icon: '&#x1F32D;', category: 'processed', serving: '1 beef frank (52g)',
+    nutrients: { vitC: 0, vitA: 0, thiamin: 0.03, riboflavin: 0.05, niacin: 2.0, vitB6: 0.06, folate: 2, vitD: 0, iron: 0.8, calcium: 6, potassium: 95, fiber: 0, protein: 5.5 },
+    notes: 'Heavily processed — curing, smoking, and cooking reduce most heat-sensitive vitamins. Mainly a protein and sodium source.' },
+  pizza_slice: { name: 'Pizza (cheese)', icon: '&#x1F355;', category: 'processed', serving: '1 large slice (140g)',
+    nutrients: { vitC: 1.3, vitA: 106, thiamin: 0.2, riboflavin: 0.19, niacin: 2.8, vitB6: 0.08, folate: 70, vitD: 0.1, iron: 2.1, calcium: 201, potassium: 172, fiber: 1.8, protein: 12 },
+    notes: 'Combines enriched flour (folate, iron) with cheese (calcium, vitamin A). High baking temp causes moderate B vitamin losses.' },
+  french_fries: { name: 'French Fries', icon: '&#x1F35F;', category: 'processed', serving: 'Medium serving (117g)',
+    nutrients: { vitC: 9.7, vitA: 0, thiamin: 0.13, riboflavin: 0.05, niacin: 2.4, vitB6: 0.28, folate: 37, vitD: 0, iron: 0.8, calcium: 15, potassium: 470, fiber: 3.8, protein: 3.4 },
+    notes: 'Deep frying destroys 50-75% of vitamin C. Potassium leaches into frying oil. Cooling after frying increases resistant starch (fiber).' },
+  mac_cheese: { name: 'Mac & Cheese', icon: '&#x1F9C0;', category: 'processed', serving: '1 cup prepared (200g)',
+    nutrients: { vitC: 0, vitA: 78, thiamin: 0.2, riboflavin: 0.2, niacin: 1.8, vitB6: 0.06, folate: 48, vitD: 0.3, iron: 1.5, calcium: 199, potassium: 139, fiber: 1.0, protein: 9.6 },
+    notes: 'Enriched pasta provides folate and iron; cheese sauce adds calcium and vitamin A. Boiling pasta leaches B vitamins.' },
+  cereal: { name: 'Breakfast Cereal', icon: '&#x1F963;', category: 'processed', serving: '1 cup fortified (30g)',
+    nutrients: { vitC: 6.0, vitA: 225, thiamin: 0.38, riboflavin: 0.43, niacin: 5.0, vitB6: 0.5, folate: 100, vitD: 1.0, iron: 4.5, calcium: 130, potassium: 55, fiber: 3.0, protein: 2.5 },
+    notes: 'Heavily fortified — often provides 25-100% DV of vitamins. Fortified nutrients are generally as bioavailable as natural sources.' },
+};
+
+const FOOD_CATEGORIES = {
+  all: { label: 'All', icon: '&#x1F37D;&#xFE0F;' },
+  produce: { label: 'Produce', icon: '&#x1F966;' },
+  meat: { label: 'Meat & Fish', icon: '&#x1F969;' },
+  dairy: { label: 'Dairy & Eggs', icon: '&#x1F95B;' },
+  grain: { label: 'Grains', icon: '&#x1F35E;' },
+  legume: { label: 'Legumes', icon: '&#x1FAD8;' },
+  processed: { label: 'Processed', icon: '&#x1F35F;' },
+};
+
+// ============================================================
 // STATE & TABS
 // ============================================================
 let selectedNutrient = 'vitC';
@@ -457,6 +638,10 @@ let selectedPreserve = 'fresh_store';
 let selectedCook = 'boiling';
 let chart = null;
 let chartNeedsRender = true;
+let selectedFood = 'broccoli';
+let foodCategoryFilter = 'all';
+let foodPreserve = 'fresh_store';
+let foodCook = 'raw';
 
 function switchTab(tabId) {
   document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tabId));
@@ -584,11 +769,147 @@ function render() {
 }
 
 // ============================================================
+// FOODS TAB
+// ============================================================
+function buildFoodPills() {
+  // Category filter pills
+  const catEl = document.getElementById('food-category-pills');
+  catEl.innerHTML = Object.entries(FOOD_CATEGORIES).map(([k, v]) =>
+    `<span class="pill ${k === foodCategoryFilter ? 'active' : ''}" data-fcat="${k}" style="cursor:pointer;">${v.icon} ${v.label}</span>`
+  ).join('');
+  catEl.addEventListener('click', e => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    foodCategoryFilter = pill.dataset.fcat;
+    renderFoodGrid();
+    catEl.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.fcat === foodCategoryFilter));
+  });
+
+  // Preserve pills for foods tab
+  const ppEl = document.getElementById('food-preserve-pills');
+  ppEl.innerHTML = Object.entries(PRESERVE).map(([k, v]) =>
+    `<span class="pill preserve ${k === foodPreserve ? 'active' : ''}" data-fpk="${k}">${v.icon} ${v.label}</span>`
+  ).join('');
+  ppEl.addEventListener('click', e => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    foodPreserve = pill.dataset.fpk;
+    ppEl.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.fpk === foodPreserve));
+    renderFoodImpact();
+  });
+
+  // Cook pills for foods tab
+  const cpEl = document.getElementById('food-cook-pills');
+  cpEl.innerHTML = Object.entries(COOK).map(([k, v]) =>
+    `<span class="pill cook ${k === foodCook ? 'active' : ''}" data-fck="${k}">${v.icon} ${v.label}</span>`
+  ).join('');
+  cpEl.addEventListener('click', e => {
+    const pill = e.target.closest('.pill');
+    if (!pill) return;
+    foodCook = pill.dataset.fck;
+    cpEl.querySelectorAll('.pill').forEach(p => p.classList.toggle('active', p.dataset.fck === foodCook));
+    renderFoodImpact();
+  });
+}
+
+function renderFoodGrid() {
+  const el = document.getElementById('food-grid');
+  const entries = Object.entries(FOODS).filter(([k, f]) => foodCategoryFilter === 'all' || f.category === foodCategoryFilter);
+  el.innerHTML = entries.map(([k, f]) =>
+    `<div class="food-card ${k === selectedFood ? 'active' : ''}" data-food="${k}" onclick="selectFood('${k}')">
+      <div class="food-icon">${f.icon}</div>
+      <div class="food-name">${f.name}</div>
+      <div class="food-cat">${f.category}</div>
+    </div>`
+  ).join('');
+}
+
+function selectFood(key) {
+  selectedFood = key;
+  renderFoodGrid();
+  renderFoodDetail();
+  renderFoodImpact();
+}
+
+function renderFoodDetail() {
+  const el = document.getElementById('food-detail');
+  const f = FOODS[selectedFood];
+  if (!f) return;
+
+  // Build nutrient bars sorted by % DV descending, skip 0 values
+  const bars = Object.entries(f.nutrients)
+    .filter(([nk, amt]) => amt > 0)
+    .map(([nk, amt]) => {
+      const n = NUTRIENTS[nk];
+      const dv = DAILY_VALUES[nk];
+      const pctDV = Math.round((amt / dv) * 100);
+      return { nk, name: n.name, amt, unit: n.unit, pctDV, category: n.category };
+    })
+    .sort((a, b) => b.pctDV - a.pctDV);
+
+  const barsHtml = bars.map(b => {
+    const barWidth = Math.min(b.pctDV, 100);
+    const color = categoryColor(b.category);
+    return `<div class="nb-row">
+      <div class="nb-label">${b.name}</div>
+      <div class="nb-bar-wrap"><div class="nb-bar" style="width:${barWidth}%;background:${color};"></div></div>
+      <div class="nb-value">${b.amt}${b.unit} <strong>(${b.pctDV}% DV)</strong></div>
+    </div>`;
+  }).join('');
+
+  el.innerHTML = `<div class="food-header">
+    <div class="fh-icon">${f.icon}</div>
+    <div><h3>${f.name}</h3><div class="fh-meta">${f.serving}</div>
+    <div class="fh-note">${f.notes}</div></div>
+  </div>
+  <div class="nutrient-bars">${barsHtml}</div>`;
+}
+
+function renderFoodImpact() {
+  const tbody = document.getElementById('food-impact-body');
+  const f = FOODS[selectedFood];
+  if (!f) return;
+
+  const rows = Object.entries(f.nutrients)
+    .filter(([nk, amt]) => amt > 0)
+    .map(([nk, amt]) => {
+      const n = NUTRIENTS[nk];
+      const stages = calcStages(nk, foodPreserve, foodCook);
+      const finalPct = stages.afterCook;
+      const finalAmt = (amt * finalPct / 100);
+      // Format to reasonable precision
+      const fmtRaw = amt >= 10 ? Math.round(amt) : amt;
+      const fmtFinal = finalAmt >= 10 ? Math.round(finalAmt) : Math.round(finalAmt * 10) / 10;
+      return { nk, name: n.name, unit: n.unit, raw: fmtRaw, final: fmtFinal, pct: finalPct, category: n.category };
+    })
+    .sort((a, b) => a.pct - b.pct); // worst retention first
+
+  tbody.innerHTML = rows.map(r => {
+    const c = retentionColor(r.pct);
+    return `<tr>
+      <td>${r.name}</td>
+      <td>${r.raw} ${r.unit}</td>
+      <td class="impact-arrow">&rarr;</td>
+      <td><strong style="color:${c};">${r.final} ${r.unit}</strong></td>
+      <td><span class="cell-badge ${cellClass(r.pct)}">${r.pct}%</span></td>
+    </tr>`;
+  }).join('');
+}
+
+function renderFoods() {
+  renderFoodGrid();
+  renderFoodDetail();
+  renderFoodImpact();
+}
+
+// ============================================================
 // INIT
 // ============================================================
 buildPills();
+buildFoodPills();
 renderRefTable();
 render();
+renderFoods();
 </script>
 </body>
 </html>
